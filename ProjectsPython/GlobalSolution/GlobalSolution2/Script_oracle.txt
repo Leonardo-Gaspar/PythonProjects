@@ -1,0 +1,15 @@
+drop table producao_plastico_global cascade constraint;
+drop table participacao_despejo_residuo_plastico cascade constraint;
+
+create table producao_plastico_global(
+    entidade varchar2(255),
+    ano number(4),
+    producao_plastico_anual number(10)
+);
+
+create table participacao_despejo_residuo_plastico(
+    entidade varchar2(255),
+    codigo varchar2(3),
+    ano number(4),
+    participacao_emissao_plastico number(13,10)
+);
