@@ -152,7 +152,7 @@ def escolher_opcao():
             finalizar_app()
         else:
             opcao_invalida()
-    except: #Caso não converta, chama a função 
+    except: #Caso não converta para int, chama a função 
         opcao_invalida()
 
 #Função main
