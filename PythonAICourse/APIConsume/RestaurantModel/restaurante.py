@@ -1,7 +1,8 @@
 import sys
-sys.path.append(r'c:\Users\leosa\PythonProjects\PythonAICourse\OOPCourse')
+sys.path.append(r'C:\Users\leosa\PythonProjects\PythonAICourse\APIConsume') 
 
 from Avaliacao.restaurante_avaliacao import Avaliacao
+from MenuRestaurant.menu_item import ItemCardapio
 
 class Restaurante:
     restaurantes = []
@@ -11,6 +12,7 @@ class Restaurante:
         self._categoria = categoria.title()
         self._ativo = False
         self._avaliacao = []
+        self._cardapio = []
         Restaurante.restaurantes.append(self)
         
     def __str__(self):       
@@ -46,8 +48,24 @@ class Restaurante:
             return '-'  
         media_avaliacoes = round(sum(avaliacao._nota for avaliacao in self._avaliacao) / len(self._avaliacao), 1)
         return media_avaliacoes
-
+ 
+    def adicionar_no_cardapio(self,item):
+        if isinstance(item,ItemCardapio):
+            self._cardapio.append(item)
+    
+    @property
+    def exibir_cardapio(self):
+        exibindo_titulo = f'Cardapio do restaurante {self._nome}'
+        linha_separacao = '_' * (len(exibindo_titulo) + 4)
+        print(linha_separacao)
+        print(exibindo_titulo)
+        print(linha_separacao)
         
-    
-    
-            
+        for i,item in enumerate(self._cardapio,start=1):
+            if hasattr(item,'descricao'):
+                mensagem_prato = f'{i}. Nome: {item._nome.ljust(17)} | Preço: R${str(item._preco).ljust(17)} | Descrição: {item.descricao}'
+                print(mensagem_prato)
+            else:
+                mensagem_bebida = f'{i}. Nome: {item._nome.ljust(17)} | Preço: R${str(item._preco).ljust(17)} | Tamanho: {item.tamanho}'
+                print(mensagem_bebida)
+
