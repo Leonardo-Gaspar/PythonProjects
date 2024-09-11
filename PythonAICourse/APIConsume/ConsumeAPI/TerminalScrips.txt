@@ -1,0 +1,7 @@
+1: PythonAICourse\APIConsume\Venv\Scripts\activate.bat                           -> To initialize Venv
+2: pip install requests                                                          -> To implement requests lib
+3: pip freeze > requeriments.txt                                                 -> To put the requeriments in a place 
+4: pip install fastapi                                                           -> To implement fastapi lib
+5: pip install uvicorn                                                           -> To implement uvicorn lib
+6: pip freeze > requeriments.txt                                                 -> To put the requeriments in a place again
+7: uvicorn PythonAICourse.APIConsume.ConsumeAPI.main:app --reload                -> To run the app
