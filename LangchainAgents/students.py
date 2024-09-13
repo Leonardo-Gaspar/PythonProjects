@@ -5,28 +5,34 @@ from langchain_openai import ChatOpenAI
 from langchain.tools import BaseTool
 import json
 import os
-import pandas as pd
 from typing import List
+import pandas as pd
+
 
 def busca_dados_de_estudante(estudante):
-    dados = pd.read_csv("LangchainAgents/Documentos/estudantes.csv")
+    dados = pd.read_csv("LangChainAgents/Documentos/estudantes.csv")
     dados_com_esse_estudante = dados[dados["USUARIO"] == estudante]
     if dados_com_esse_estudante.empty:
         return {}
     return dados_com_esse_estudante.iloc[:1].to_dict()
 
 class ExtratorDeEstudante(BaseModel):
-    estudante:str = Field("Nome do estudante informado, sempre em letras minúsculas. Exemplo: joão, carlos, joana, carla.")
+    estudante:str = Field("Nome do estudante informado, sempre em letras minúsculas.")
 
 class DadosDeEstudante(BaseTool):
     name = "DadosDeEstudante"
-    description = """Esta ferramenta extrai o histórico e preferências de um estudante de acordo com seu histórico."""
+    description = """Esta ferramenta extrai o histórico e preferências de um estudante de acordo com seu histórico.
+                Passe para essa ferramenta como argumento o nome do estudante."""
 
     def _run(self, input: str) -> str:
         llm = ChatOpenAI(model="gpt-4o",
                          api_key=os.getenv("OPENAI_API_KEY"))
         parser = JsonOutputParser(pydantic_object=ExtratorDeEstudante)
-        template = PromptTemplate(template="""Você deve analisar a {input} e extrair o nome de usuário informado.
+        template = PromptTemplate(template="""Você deve analisar a entrada a seguir e extrair o nome informado em minúsculo.
+                                        Entrada:
+                                        -----------------
+                                        {input}
+                                        -----------------
                         Formato de saída:
                         {formato_saida}""",
                         input_variables=["input"],
@@ -34,9 +40,11 @@ class DadosDeEstudante(BaseTool):
         cadeia = template | llm | parser
         resposta = cadeia.invoke({"input" : input})
         estudante = resposta['estudante']
-        estudante = estudante.lower()
+        # estudante = input
+        estudante = estudante.lower().strip()
         dados = busca_dados_de_estudante(estudante)
         return json.dumps(dados)
+
 
 class Nota(BaseModel):
     area:str = Field("Nome da área de conhecimento")
@@ -51,25 +59,26 @@ class PerfilAcademicoDeEstudante(BaseModel):
 class PerfilAcademico(BaseTool):
     name = "PerfilAcademico"
     description = """Cria um perfil acadêmico de um estudante.
-Esta ferramenta requer como entrada todos os dados do estudante."""
+                    Esta ferramenta requer como entrada todos os dados do estudante.
+                    Eu sou incapaz de buscar os dados do estudante.
+                    Você tem que buscar os dados do estudante antes de me invocar."""
 
     def _run(self, input:str) -> str:
         llm = ChatOpenAI(model="gpt-4o",
                          api_key=os.getenv("OPENAI_API_KEY"))
         parser = JsonOutputParser(pydantic_object=PerfilAcademicoDeEstudante)
-        template = PromptTemplate(template = """
-                                - Formate o estudante para seu perfil acadêmico.
-                                - Com os dados, identifique as opções de universidades sugeridas e cursos compatíveis com o interesse do aluno
-                                - Destaque o perfil do aluno dando enfase principalmente naquilo que faz sentido para as instituições de interesse do aluno
+        template = PromptTemplate(template = """- Formate o estudante para seu perfil acadêmico.
+                                            - Com os dados, identifique as opções de universidades sugeridas e cursos compatíveis com o interesse do aluno
+                                            - Destaque o perfil do aluno dando enfase principalmente naquilo que faz sentido para as instituições de interesse do aluno
 
-                                Persona: você é uma consultora de carreira e precisa indicar com detalhes, riqueza, mas direta ao ponto para o estudante as opções e consequências possíveis.
-                                Informações atuais:
+                                            Persona: você é uma consultora de carreira e precisa indicar com detalhes, riqueza, mas direta ao ponto para o estudante as opções e consequências possíveis.
+                                            Informações atuais:
 
-                                {dados_do_estudante}
-                                {formato_de_saida}
-                                """,
-                                input_variables=["dados_do_estudante"],
-                                partial_variables={"formato_de_saida" : parser.get_format_instructions()})
+                                            {dados_do_estudante}
+                                            {formato_de_saida}
+                                            """,
+            input_variables=["dados_do_estudante"],
+            partial_variables={"formato_de_saida" : parser.get_format_instructions()})
         cadeia = template | llm | parser
         resposta = cadeia.invoke({"dados_do_estudante" : input})
         return resposta
