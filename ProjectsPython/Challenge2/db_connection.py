@@ -10,7 +10,6 @@ def conectar_oracle():
         password = os.getenv('ORACLE_PASSWORD')
         dsn = os.getenv('ORACLE_DSN')
 
-        # Conecta ao banco de dados Oracle
         connection = oracledb.connect(user=user, password=password, dsn=dsn)
         print("Conexão com o banco de dados Oracle estabelecida com sucesso!")
         return connection
